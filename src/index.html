@@ -3,7 +3,7 @@
   <head>
     <meta name="viewport" content="width=400, user-scalable=no" />
     <meta name="theme-color" content="#000000" />
-    <title>(t,i,x,y) => "creative code golfing"</title>
+    <title>(t,i,x,y,s) => "creative code golfing"</title>
     <meta name="description" content="A minimalist coding environment. Control 16x16 points with a single JavaScript function.">
     <link rel="stylesheet" href="style.styl" inline="inline" />
 
@@ -26,8 +26,8 @@
         <label for="input">// click the dots for more</label>
       </div>
 
-      <label id="label" for="input">(t,i,x,y) =></label>
-      <input name="code" id="input" type="text" value="Math.sin(y/8+t)" autocomplete="off" autocapitalize="off" spellcheck="false" autocorrect="off" maxlength="32" />
+      <label id="label" for="input">(t,i,x,y,s) =></label>
+      <input name="code" id="input" type="text" value="Math.sin(y/8+t)" autocomplete="off" autocapitalize="off" spellcheck="false" autocorrect="off" maxlength="1000" />
     </div>
 
     <iframe id="code-runner" sandbox="allow-same-origin"></iframe>

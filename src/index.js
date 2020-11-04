@@ -1,24 +1,25 @@
-const count = 16;
-const size = 16;
+const count = 128;
+const size = 10;
 const spacing = 1;
 const width = count * (size + spacing);
 
-import examples from './examples.json';
+import examples from "./examples.json";
 
-const runner = document.getElementById('code-runner').contentWindow;
-const input = document.getElementById('input');
-const editor = document.getElementById('editor');
-const comment = document.getElementById('comment');
-const output = document.getElementById('output');
-const context = output.getContext('2d');
+const runner = document.getElementById("code-runner").contentWindow;
+const input = document.getElementById("input");
+const editor = document.getElementById("editor");
+const comment = document.getElementById("comment");
+const output = document.getElementById("output");
+const context = output.getContext("2d");
 const dpr = window.devicePixelRatio || 1;
 
 let callback = function () {};
 let startTime = new Date();
-let code = '';
+let code = "";
+let oldState = Array(count * count).fill(0);
 
 output.width = output.height = width * dpr;
-context.scale(dpr,dpr);
+context.scale(dpr, dpr);
 output.style.width = output.style.height = `${width}px`;
 
 const cells = [];
@@ -28,7 +29,7 @@ for (let y = 1, index = 0; y <= count; y++) {
     cells.push({
       index,
       x,
-      y
+      y,
     });
     index++;
   }
@@ -37,8 +38,8 @@ for (let y = 1, index = 0; y <= count; y++) {
 function readURL() {
   const url = new URL(document.location);
 
-  if (url.searchParams.has('code')) {
-    input.value = url.searchParams.get('code');
+  if (url.searchParams.has("code")) {
+    input.value = url.searchParams.get("code");
   }
 }
 
@@ -50,37 +51,38 @@ function updateCallback() {
 
   try {
     callback = runner.eval(`
-      (function f(t,i,x,y) {
-        try {
-          with (Math) {
-            return ${code.replace(/\\/g, ';')};
-          }
-        } catch (error) {
-          return error;
+    (function f(t,i,x,y,s) {
+      try {
+        with (Math) {
+          return ${code.replace(/\\/g, ";")};
         }
-      })
+      } catch (error) {
+        return error;
+      }
+    })
     `);
+    console.log("callback", callback);
   } catch (error) {
     callback = null;
   }
 }
 
 updateCallback();
-input.addEventListener('input', updateCallback);
+input.addEventListener("input", updateCallback);
 
-input.addEventListener('focus', function () {
+input.addEventListener("focus", function () {
   updateComments([
     'hit "enter" to save in URL',
-    'or get <a href="https://twitter.com/aemkei/status/1323399877611708416">more info here</a>'
+    'or get <a href="https://twitter.com/aemkei/status/1323399877611708416">more info here</a>',
   ]);
 });
 
-input.addEventListener('blur', updateCommentsForCode);
+input.addEventListener("blur", updateCommentsForCode);
 
-editor.addEventListener('submit', (event) => {
+editor.addEventListener("submit", (event) => {
   event.preventDefault();
   const url = new URL(document.location);
-  url.searchParams.set('code', code);
+  url.searchParams.set("code", code);
   history.replaceState(null, code, url);
 });
 
@@ -88,25 +90,27 @@ function render() {
   const time = (new Date() - startTime) / 1000;
 
   if (!callback) {
-    window.requestAnimationFrame(render);
+    window.setTimeout(render, 500);
     return;
   }
 
   output.width = output.height = width * dpr;
-  context.scale(dpr,dpr)
+  context.scale(dpr, dpr);
   let index = 0;
+  let state = [];
   for (let y = 0; y < count; y++) {
     for (let x = 0; x < count; x++) {
       index++;
 
-      const value = callback(time, index, x, y);
+      const value = callback(time, index, x, y, oldState);
+      state.push(value);
       const offset = size / 2;
-      let color = '#FFF';
+      let color = "#FFF";
       let radius = (value * size) / 2;
 
       if (radius < 0) {
         radius = -radius;
-        color = '#F24';
+        color = "#F24";
       }
 
       if (radius > size / 2) {
@@ -125,17 +129,18 @@ function render() {
       context.fill();
     }
   }
+  oldState = state;
 
-  window.requestAnimationFrame(render);
+  window.setTimeout(render, 500);
 }
 
 render();
 
 function updateComments(comments) {
-  const lines = comment.querySelectorAll('label');
+  const lines = comment.querySelectorAll("label");
 
   if (comments.length === 1) {
-    lines[0].innerHTML = '&nbsp;';
+    lines[0].innerHTML = "&nbsp;";
     lines[1].innerHTML = `// ${comments[0]}`;
   } else {
     lines[0].innerHTML = `// ${comments[0]}`;
@@ -155,7 +160,7 @@ function updateCommentsForCode() {
     return;
   }
 
-  const newComments = newComment.split('\n');
+  const newComments = newComment.split("\n");
 
   updateComments(newComments);
 }
@@ -184,7 +189,7 @@ function nextExample() {
   updateCallback();
 }
 
-output.addEventListener('click', nextExample);
+output.addEventListener("click", nextExample);
 
 window.onpopstate = function (event) {
   readURL();

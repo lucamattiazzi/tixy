@@ -15,6 +15,7 @@
   "license": "ISC",
   "devDependencies": {
     "cssnano": "^4.1.10",
+    "parcel": "^1.12.4",
     "parcel-plugin-inline-source": "^1.0.0",
     "stylus": "^0.54.8"
   },
